@@ -192,7 +192,7 @@ def configure_extensions(app):
     allows.identity_loader(lambda: current_user)
 
     # Flask-WTF CSRF
-    csrf.init_app(app)
+    # csrf.init_app(app)
 
     # Flask-SQLAlchemy
     db.init_app(app)

@@ -88,21 +88,35 @@ class Login(MethodView):
         return render_template("auth/login.html", form=self.form())
 
     def post(self):
-        form = self.form()
-        if form.validate_on_submit():
-            auth_manager = self.authentication_manager_factory()
-            try:
-                user = auth_manager.authenticate(
-                    identifier=form.login.data, secret=form.password.data
-                )
-                login_user(user, remember=form.remember_me.data)
-                return redirect_or_next(url_for("forum.index"))
-            except StopAuthentication as e:
-                flash(e.reason, "danger")
-            except Exception:
-                flash(_("Unrecoverable error while handling login"))
+        credentials = request.get_json()
+        auth_manager = self.authentication_manager_factory()
+        try:
+            user = auth_manager.authenticate(
+                identifier=credentials.username, secret=credentials.password
+            )
+            login_user(user, remember=form.remember_me.data)
+            return redirect_or_next(url_for("forum.index"))
+        except StopAuthentication as e:
+            flash(e.reason, "danger")
+        except Exception:
+            flash(_("Unrecoverable error while handling login"))
 
-        return render_template("auth/login.html", form=form)
+        return {"success": True}, 200
+        # form = self.form()
+        # if form.validate_on_submit():
+        #     auth_manager = self.authentication_manager_factory()
+        #     try:
+        #         user = auth_manager.authenticate(
+        #             identifier=form.login.data, secret=form.password.data
+        #         )
+        #         login_user(user, remember=form.remember_me.data)
+        #         return redirect_or_next(url_for("forum.index"))
+        #     except StopAuthentication as e:
+        #         flash(e.reason, "danger")
+        #     except Exception:
+        #         flash(_("Unrecoverable error while handling login"))
+
+        # return render_template("auth/login.html", form=form)
 
 
 class Reauth(MethodView):
@@ -174,15 +188,15 @@ class Register(MethodView):
                 form.populate_errors(e.reasons)
                 return render_template("auth/register.html", form=form)
             except PersistenceError:
-                    logger.exception("Database error while persisting user")
-                    flash(
-                        _(
-                            "Could not process registration due"
-                            "to an unrecoverable error"
-                        ), "danger"
-                    )
+                logger.exception("Database error while persisting user")
+                flash(
+                    _(
+                        "Could not process registration due"
+                        "to an unrecoverable error"
+                    ), "danger"
+                )
 
-                    return render_template("auth/register.html", form=form)
+                return render_template("auth/register.html", form=form)
 
             current_app.pluggy.hook.flaskbb_event_user_registered(
                 username=registration_info.username
