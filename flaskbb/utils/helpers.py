@@ -30,7 +30,7 @@ from babel.dates import format_timedelta as babel_format_timedelta
 from flask import flash, g, redirect, request, session, url_for
 from flask_allows import Permission
 from flask_babelplus import lazy_gettext as _
-from flask_login import current_user
+from flask_jwt_extended import current_user
 from flask_themes2 import get_themes_list, render_theme_template
 from jinja2 import Markup
 from PIL import ImageFile
@@ -649,7 +649,7 @@ def app_config_from_env(app, prefix="FLASKBB_"):
     """
     for key, value in iteritems(os.environ):
         if key.startswith(prefix):
-            key = key[len(prefix) :]
+            key = key[len(prefix):]
             try:
                 value = ast.literal_eval(value)
             except (ValueError, SyntaxError):
@@ -743,7 +743,7 @@ class ReverseProxyPathFix(object):
             environ["SCRIPT_NAME"] = script_name
             path_info = environ.get("PATH_INFO", "")
             if path_info and path_info.startswith(script_name):
-                environ["PATH_INFO"] = path_info[len(script_name) :]
+                environ["PATH_INFO"] = path_info[len(script_name):]
         server = environ.get(
             "HTTP_X_FORWARDED_SERVER_CUSTOM",
             environ.get("HTTP_X_FORWARDED_SERVER", ""),

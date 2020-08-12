@@ -26,7 +26,7 @@ from flaskbb._compat import iteritems, string_types
 # extensions
 from flaskbb.extensions import (alembic, allows, babel, cache, celery, csrf,
                                 db, debugtoolbar, limiter, login_manager, mail,
-                                redis_store, themes, whooshee)
+                                redis_store, themes, whooshee, jwt)
 from flaskbb.plugins import spec
 from flaskbb.plugins.manager import FlaskBBPluginManager
 from flaskbb.plugins.models import PluginRegistry
@@ -217,6 +217,17 @@ def configure_extensions(app):
 
     # Flask-Limiter
     limiter.init_app(app)
+
+    jwt.init_app(app)
+
+    @jwt.user_loader_callback_loader
+    def user_loader_callback(identify):
+        user = User.query.filter_by(id=identify).first()
+        return user
+
+    @jwt.user_identity_loader
+    def user_identity_loader(user):
+        return user.id
 
     # Flask-Whooshee
     whooshee.init_app(app)

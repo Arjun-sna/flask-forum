@@ -25,6 +25,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_themes2 import Themes
 from flask_whooshee import Whooshee
 from flask_wtf.csrf import CSRFProtect
+from flask_jwt_extended import JWTManager
 
 from flaskbb.exceptions import AuthorizationRequired
 
@@ -78,3 +79,6 @@ limiter = Limiter(auto_check=False, key_func=get_remote_address)
 
 # Celery
 celery = Celery("flaskbb")
+
+# jwt
+jwt = JWTManager()

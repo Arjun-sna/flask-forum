@@ -14,6 +14,7 @@ from datetime import datetime
 
 from flask import Blueprint, current_app, flash, g, redirect, request, url_for
 from flask.views import MethodView
+from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required, current_user
 from flask_babelplus import gettext as _
 from flask_login import (
     confirm_login,
@@ -74,49 +75,25 @@ class Logout(MethodView):
 
 
 class Login(MethodView):
-    decorators = [anonymous_required]
-
     def __init__(self, authentication_manager_factory):
         self.authentication_manager_factory = authentication_manager_factory
-
-    def form(self):
-        if enforce_recaptcha(limiter):
-            return LoginRecaptchaForm()
-        return LoginForm()
-
-    def get(self):
-        return render_template("auth/login.html", form=self.form())
 
     def post(self):
         credentials = request.get_json()
         auth_manager = self.authentication_manager_factory()
         try:
             user = auth_manager.authenticate(
-                identifier=credentials.username, secret=credentials.password
+                identifier=credentials['username'], secret=credentials['password']
             )
-            login_user(user, remember=form.remember_me.data)
-            return redirect_or_next(url_for("forum.index"))
+            print(user)
+            access_token = create_access_token(user)
+            return {'token': access_token}, 200
         except StopAuthentication as e:
-            flash(e.reason, "danger")
-        except Exception:
-            flash(_("Unrecoverable error while handling login"))
-
-        return {"success": True}, 200
-        # form = self.form()
-        # if form.validate_on_submit():
-        #     auth_manager = self.authentication_manager_factory()
-        #     try:
-        #         user = auth_manager.authenticate(
-        #             identifier=form.login.data, secret=form.password.data
-        #         )
-        #         login_user(user, remember=form.remember_me.data)
-        #         return redirect_or_next(url_for("forum.index"))
-        #     except StopAuthentication as e:
-        #         flash(e.reason, "danger")
-        #     except Exception:
-        #         flash(_("Unrecoverable error while handling login"))
-
-        # return render_template("auth/login.html", form=form)
+            print(e)
+            return e.reason, 401
+        except Exception as e:
+            print(e)
+            return "Server error", 500
 
 
 class Reauth(MethodView):
