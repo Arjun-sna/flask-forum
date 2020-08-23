@@ -53,6 +53,7 @@ from flaskbb.utils.search import (ForumWhoosheer, PostWhoosheer,
 # app specific configurations
 from flaskbb.utils.settings import flaskbb_config
 from flaskbb.utils.translations import FlaskBBDomain
+from flaskbb.core.exceptions import PersistenceError
 
 from . import markup  # noqa
 from .auth import views as auth_views  # noqa
@@ -345,15 +346,26 @@ def configure_errorhandlers(app):
 
     @app.errorhandler(403)
     def forbidden_page(error):
-        return render_template("errors/forbidden_page.html"), 403
+        return 'forbidden', 403
 
     @app.errorhandler(404)
     def page_not_found(error):
-        return render_template("errors/page_not_found.html"), 404
+        return 'Not found', 404
 
     @app.errorhandler(500)
     def server_error_page(error):
-        return render_template("errors/server_error.html"), 500
+        logger.exception(error)
+        return 'Internal server error', 500
+
+    @app.errorhandler(PersistenceError)
+    def db_error_handler(error):
+        logger.exception(error)
+        return 'Internal server error', 500
+
+    @app.errorhandler(Exception)
+    def unhandled_server_error_page(error):
+        logger.exception(error)
+        return 'Internal server error', 500
 
     app.pluggy.hook.flaskbb_errorhandlers(app=app)
 

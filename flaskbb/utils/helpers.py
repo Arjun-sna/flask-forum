@@ -793,7 +793,7 @@ def parse_pkg_metadata(dist_name):
 def anonymous_required(f):
     @wraps(f)
     def wrapper(*a, **k):
-        if current_user is not None and current_user.is_authenticated:
+        if current_user and current_user.is_authenticated:
             return redirect_or_next(url_for("forum.index"))
         return f(*a, **k)
 
