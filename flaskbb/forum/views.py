@@ -13,7 +13,7 @@ import logging
 import math
 
 from flask import (Blueprint, abort, current_app, flash, redirect, request,
-                   url_for)
+                   url_for, jsonify)
 from flask.views import MethodView
 from flask_allows import And, Permission
 from flask_babelplus import gettext as _
@@ -616,64 +616,93 @@ class ReportView(MethodView):
 
 
 class MemberList(MethodView):
-    form = UserSearchForm
+    # form = UserSearchForm
+    members_order_by_switcher = {
+        "asc": asc,
+        "desc": desc
+    }
+    members_sort_by_switcher = {
+        "reg_date": User.id,
+        "post_count": User.post_count,
+        "user_name": User.username
+    }
 
     def get(self):
         page = request.args.get("page", 1, type=int)
         sort_by = request.args.get("sort_by", "reg_date")
         order_by = request.args.get("order_by", "asc")
 
-        if order_by == "asc":
-            order_func = asc
-        else:
-            order_func = desc
+        order_func = self.members_order_by_switcher.get(order_by, asc)
+        sort_obj = self.members_sort_by_switcher.get(sort_by, User.id)
 
-        if sort_by == "reg_date":
-            sort_obj = User.id
-        elif sort_by == "post_count":
-            sort_obj = User.post_count
-        else:
-            sort_obj = User.username
-
-        users = User.query.order_by(order_func(sort_obj)).paginate(
+        page_result = User.query.order_by(order_func(sort_obj)).paginate(
             page, flaskbb_config["USERS_PER_PAGE"], False
         )
-        return render_template(
-            "forum/memberlist.html", users=users, search_form=self.form()
-        )
 
-    def post(self):
-        page = request.args.get("page", 1, type=int)
-        sort_by = request.args.get("sort_by", "reg_date")
-        order_by = request.args.get("order_by", "asc")
+        users = []
+        for user in page_result.items:
+            users.append({
+                'username': user.username,
+                'email': user.email
+            })
+        return jsonify(users), 200
 
-        if order_by == "asc":
-            order_func = asc
-        else:
-            order_func = desc
+    # def get(self):
+    #     page = request.args.get("page", 1, type=int)
+    #     sort_by = request.args.get("sort_by", "reg_date")
+    #     order_by = request.args.get("order_by", "asc")
 
-        if sort_by == "reg_date":
-            sort_obj = User.id
-        elif sort_by == "post_count":
-            sort_obj = User.post_count
-        else:
-            sort_obj = User.username
+    #     if order_by == "asc":
+    #         order_func = asc
+    #     else:
+    #         order_func = desc
 
-        form = self.form()
-        if form.validate():
-            users = form.get_results().paginate(
-                page, flaskbb_config["USERS_PER_PAGE"], False
-            )
-            return render_template(
-                "forum/memberlist.html", users=users, search_form=form
-            )
+    #     if sort_by == "reg_date":
+    #         sort_obj = User.id
+    #     elif sort_by == "post_count":
+    #         sort_obj = User.post_count
+    #     else:
+    #         sort_obj = User.username
 
-        users = User.query.order_by(order_func(sort_obj)).paginate(
-            page, flaskbb_config["USERS_PER_PAGE"], False
-        )
-        return render_template(
-            "forum/memberlist.html", users=users, search_form=form
-        )
+    #     users = User.query.order_by(order_func(sort_obj)).paginate(
+    #         page, flaskbb_config["USERS_PER_PAGE"], False
+    #     )
+    #     return render_template(
+    #         "forum/memberlist.html", users=users, search_form=self.form()
+    #     )
+
+    # def post(self):
+    #     page = request.args.get("page", 1, type=int)
+    #     sort_by = request.args.get("sort_by", "reg_date")
+    #     order_by = request.args.get("order_by", "asc")
+
+    #     if order_by == "asc":
+    #         order_func = asc
+    #     else:
+    #         order_func = desc
+
+    #     if sort_by == "reg_date":
+    #         sort_obj = User.id
+    #     elif sort_by == "post_count":
+    #         sort_obj = User.post_count
+    #     else:
+    #         sort_obj = User.username
+
+    #     form = self.form()
+    #     if form.validate():
+    #         users = form.get_results().paginate(
+    #             page, flaskbb_config["USERS_PER_PAGE"], False
+    #         )
+    #         return render_template(
+    #             "forum/memberlist.html", users=users, search_form=form
+    #         )
+
+    #     users = User.query.order_by(order_func(sort_obj)).paginate(
+    #         page, flaskbb_config["USERS_PER_PAGE"], False
+    #     )
+    #     return render_template(
+    #         "forum/memberlist.html", users=users, search_form=form
+    #     )
 
 
 class TopicTracker(MethodView):
@@ -958,7 +987,8 @@ class WhoIsOnline(MethodView):
         if current_app.config["REDIS_ENABLED"]:
             online_users = get_online_users()
         else:
-            online_users = User.query.filter(User.lastseen >= time_diff()).all()
+            online_users = User.query.filter(
+                User.lastseen >= time_diff()).all()
         return render_template(
             "forum/online_users.html", online_users=online_users
         )
