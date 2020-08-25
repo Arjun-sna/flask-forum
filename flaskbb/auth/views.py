@@ -136,13 +136,9 @@ class Register(MethodView):
 
 class ForgotPassword(MethodView):
     decorators = [anonymous_required]
-    # form = ForgotPasswordForm
 
     def __init__(self, password_reset_service_factory):
         self.password_reset_service_factory = password_reset_service_factory
-
-    # def get(self):
-    #     return render_template("auth/forgot_password.html", form=self.form())
 
     def post(self):
         # form = self.form()
@@ -154,35 +150,17 @@ class ForgotPassword(MethodView):
         except ValidationError:
             return {'error': "You have entered an username or email address that "
                     "is not linked with your account."}, 422
-            # flash(
-            #     _(
-            #         "You have entered an username or email address that "
-            #         "is not linked with your account."
-            #     ), "danger"
-            # )
         else:
             return {'success': True}, 200
-            # flash(_("Email sent! Please check your inbox."), "info")
-            # return redirect(url_for("auth.forgot_password"))
-
-        # return render_template("auth/forgot_password.html", form=form)
 
 
 class ResetPassword(MethodView):
     decorators = [anonymous_required]
-    # form = ResetPasswordForm
 
     def __init__(self, password_reset_service_factory):
         self.password_reset_service_factory = password_reset_service_factory
 
-    # def get(self, token):
-    #     form = self.form()
-    #     form.token.data = token
-    #     return render_template("auth/reset_password.html", form=form)
-
     def post(self, token):
-        # form = self.form()
-        # if form.validate_on_submit():
         request_data = request.get_json()
         try:
             service = self.password_reset_service_factory()
@@ -191,17 +169,8 @@ class ResetPassword(MethodView):
             )
         except TokenError as e:
             return jsonify(e.reason), 422
-            # flash(e.reason, 'danger')
-            # return redirect(url_for('auth.forgot_password'))
         except StopValidation as e:
             return jsonify(e.reasons), 401
-            # form.populate_errors(e.reasons)
-            # form.token.data = token
-            # return render_template("auth/reset_password.html", form=form)
-        # except Exception:
-        #     logger.exception("Error when resetting password")
-        #     flash(_('Error when resetting password'))
-        #     return redirect(url_for('auth.forgot_password'))
         finally:
             try:
                 db.session.commit()
@@ -212,24 +181,13 @@ class ResetPassword(MethodView):
                 db.session.rollback()
 
         return {'success': True}, 200
-        # flash(_("Your password has been updated."), "success")
-        # return redirect(url_for("auth.login"))
-
-        # form.token.data = token
-        # return render_template("auth/reset_password.html", form=form)
 
 
 class RequestActivationToken(MethodView):
     decorators = [requires_unactivated]
-    # form = RequestActivationForm
 
     def __init__(self, account_activator_factory):
         self.account_activator_factory = account_activator_factory
-
-    # def get(self):
-    #     return render_template(
-    #         "auth/request_account_activation.html", form=self.form()
-    #     )
 
     def post(self):
         form = self.form()
@@ -265,35 +223,13 @@ class AutoActivateAccount(MethodView):
         try:
             activator.activate_account(token)
         except TokenError as e:
-            # flash(e.reason, 'danger')
             return {'error': jsonify(e.reason)}, 422
         except ValidationError as e:
             return {'error': jsonify(e.reason)}, 422
-            # flash(e.reason, 'danger')
-            # return redirect(url_for('forum.index'))
 
         else:
-            # try:
             db.session.commit()
             return {'success': True}, 200
-            # except Exception:  # noqa
-            #     logger.exception("Database error while activating account")
-            #     db.session.rollback()
-            #     flash(
-            #         _(
-            #             "Could not activate account due to an unrecoverable error"  # noqa
-            #         ), "danger"
-            #     )
-
-            #     return redirect(url_for('auth.request_activation_token'))
-
-            # flash(
-            #     _("Your account has been activated and you can now login."),
-            #     "success"
-            # )
-            # return redirect(url_for("forum.index"))
-
-        # return redirect(url_for('auth.activate_account'))
 
 
 class ActivateAccount(MethodView):
