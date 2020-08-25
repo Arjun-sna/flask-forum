@@ -26,6 +26,7 @@ from flask_themes2 import Themes
 from flask_whooshee import Whooshee
 from flask_wtf.csrf import CSRFProtect
 from flask_jwt_extended import JWTManager
+from flask_marshmallow import Marshmallow
 
 from flaskbb.exceptions import AuthorizationRequired
 
@@ -82,3 +83,6 @@ celery = Celery("flaskbb")
 
 # jwt
 jwt = JWTManager()
+
+# marshmallow
+ma = Marshmallow()

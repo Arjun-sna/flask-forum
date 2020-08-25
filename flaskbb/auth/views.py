@@ -16,6 +16,7 @@ from flask import Blueprint, current_app, flash, g, redirect, request, url_for, 
 from flask.views import MethodView
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required, current_user
 from flask_babelplus import gettext as _
+from marshmallow.exceptions import ValidationError as DataError
 from flask_login import (
     confirm_login,
     current_user,
@@ -50,7 +51,7 @@ from flaskbb.utils.helpers import (
 from flaskbb.utils.settings import flaskbb_config
 
 from ..core.auth.authentication import StopAuthentication
-from ..core.auth.registration import UserRegistrationInfo
+from ..core.auth.registration import UserRegistrationInfo, UserRegistrationInputSchema
 from ..core.exceptions import PersistenceError, StopValidation, ValidationError
 from ..core.tokens import TokenError
 from .plugins import impl
@@ -63,6 +64,7 @@ from .services import (
 )
 
 logger = logging.getLogger(__name__)
+user_registration_info_schema = UserRegistrationInputSchema()
 
 
 # class Logout(MethodView):
@@ -122,20 +124,14 @@ class Register(MethodView):
 
     def post(self):
         request_data = request.get_json()
-        registration_info = UserRegistrationInfo(
-            username=request_data['username'],
-            password=request_data['password'],
-            group=4,
-            email=request_data['email'],
-            language=request_data['language']
-        )
-        service = self.registration_service_factory()
         try:
-            service.register(registration_info)
+            user = user_registration_info_schema.load(request_data)
+            service = self.registration_service_factory()
+            service.register(user)
             return {'success': True}
         except StopValidation as e:
             logger.exception(e)
-            return jsonify(e.reasons), 400
+            return jsonify(e.reasons), 422
 
 
 class ForgotPassword(MethodView):

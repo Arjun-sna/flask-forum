@@ -7,9 +7,11 @@
     :copyright: (c) 2014-2018 the FlaskBB Team.
     :license: BSD, see LICENSE for more details
 """
+import logging
+
 from flask import flash, redirect, url_for
 from flask_login import current_user, logout_user
-
+from marshmallow.exceptions import ValidationError as MValidationError
 from . import impl
 from ..core.auth.authentication import ForceLogout
 from ..extensions import db
@@ -36,6 +38,9 @@ from .services.registration import (
     UsernameUniquenessValidator,
     UsernameValidator,
 )
+from flaskbb.core.exceptions import PersistenceError
+
+logger = logging.getLogger(__name__)
 
 
 @impl(trylast=True)
@@ -84,6 +89,16 @@ def flaskbb_errorhandlers(app):
             if error.reason:
                 flash(error.reason, "danger")
         return redirect(url_for("forum.index"))
+
+    @app.errorhandler(PersistenceError)
+    def db_error_handler(error):
+        logger.exception(error)
+        return 'Internal server error', 500
+
+    @app.errorhandler(MValidationError)
+    def marshmallow_validation_error_handler(error):
+        logger.exception(error)
+        return error.normalized_messages(), 422
 
 
 @impl

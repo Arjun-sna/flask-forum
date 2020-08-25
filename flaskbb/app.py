@@ -26,7 +26,7 @@ from flaskbb._compat import iteritems, string_types
 # extensions
 from flaskbb.extensions import (alembic, allows, babel, cache, celery, csrf,
                                 db, debugtoolbar, limiter, login_manager, mail,
-                                redis_store, themes, whooshee, jwt)
+                                redis_store, themes, whooshee, jwt, ma)
 from flaskbb.plugins import spec
 from flaskbb.plugins.manager import FlaskBBPluginManager
 from flaskbb.plugins.models import PluginRegistry
@@ -53,7 +53,6 @@ from flaskbb.utils.search import (ForumWhoosheer, PostWhoosheer,
 # app specific configurations
 from flaskbb.utils.settings import flaskbb_config
 from flaskbb.utils.translations import FlaskBBDomain
-from flaskbb.core.exceptions import PersistenceError
 
 from . import markup  # noqa
 from .auth import views as auth_views  # noqa
@@ -221,6 +220,8 @@ def configure_extensions(app):
 
     jwt.init_app(app)
 
+    ma.init_app(app)
+
     @jwt.user_loader_callback_loader
     def user_loader_callback(identify):
         user = User.query.filter_by(id=identify).first()
@@ -354,11 +355,6 @@ def configure_errorhandlers(app):
 
     @app.errorhandler(500)
     def server_error_page(error):
-        logger.exception(error)
-        return 'Internal server error', 500
-
-    @app.errorhandler(PersistenceError)
-    def db_error_handler(error):
         logger.exception(error)
         return 'Internal server error', 500
 

@@ -99,7 +99,7 @@ class UsernameUniquenessValidator(UserValidator):
 
     def validate(self, user_info):
         count = self.users.query.filter(
-            func.lower(self.users.username) == user_info.username
+            func.lower(self.users.username) == func.lower(user_info.username)
         ).count()
         if count != 0:  # pragma: no branch
             raise ValidationError(
@@ -199,14 +199,14 @@ class RegistrationService(UserRegistrationService):
         self.users = users
         self.db = db
 
-    def register(self, user_info):
+    def register(self, user):
         try:
-            self._validate_registration(user_info)
+            self._validate_registration(user)
         except StopValidation as e:
-            self._handle_failure(user_info, e.reasons)
+            self._handle_failure(user, e.reasons)
             raise
 
-        user = self._store_user(user_info)
+        user = self._store_user(user)
         self._post_process(user)
         return user
 
@@ -227,16 +227,8 @@ class RegistrationService(UserRegistrationService):
             user_info=user_info, failures=failures
         )
 
-    def _store_user(self, user_info):
+    def _store_user(self, user):
         try:
-            user = User(
-                username=user_info.username,
-                email=user_info.email,
-                password=user_info.password,
-                language=user_info.language,
-                primary_group_id=user_info.group,
-                date_joined=datetime.now(UTC),
-            )
             self.db.session.add(user)
             self.db.session.commit()
             return user
