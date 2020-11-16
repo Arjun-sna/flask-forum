@@ -85,7 +85,7 @@ class Login(MethodView):
         auth_manager = self.authentication_manager_factory()
         try:
             user = auth_manager.authenticate(
-                identifier=credentials['username'], secret=credentials.password
+                identifier=credentials['username'], secret=credentials['password']
             )
             access_token = create_access_token(user)
             return {'token': access_token}, 200
