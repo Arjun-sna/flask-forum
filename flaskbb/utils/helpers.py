@@ -814,8 +814,7 @@ def registration_enabled(f):
     @wraps(f)
     def wrapper(*a, **k):
         if not flaskbb_config["REGISTRATION_ENABLED"]:
-            flash(_("The registration has been disabled."), "info")
-            return redirect_or_next(url_for("forum.index"))
+            return 'Registration disabled', 403
         return f(*a, **k)
 
     return wrapper
