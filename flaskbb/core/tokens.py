@@ -70,6 +70,7 @@ class TokenActions:
     """
     RESET_PASSWORD = 'reset_password'
     ACTIVATE_ACCOUNT = 'activate_account'
+    AUTH = 'auth'
 
 
 @attr.s(frozen=True, cmp=True, hash=True)

@@ -84,10 +84,9 @@ class Login(MethodView):
         credentials = request.get_json()
         auth_manager = self.authentication_manager_factory()
         try:
-            user = auth_manager.authenticate(
+            access_token, user = auth_manager.authenticate(
                 identifier=credentials['username'], secret=credentials['password']
             )
-            access_token = create_access_token(user)
             return {'token': access_token}, 200
         except StopAuthentication as e:
             logger.exception(e)

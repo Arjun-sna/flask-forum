@@ -26,6 +26,7 @@ from ...core.auth.authentication import (AuthenticationFailureHandler,
 from ...extensions import db
 from ...user.models import User
 from ...utils.helpers import time_utcnow
+from ...core.tokens import Token, TokenActions
 
 logger = logging.getLogger(__name__)
 
@@ -148,9 +149,10 @@ class PluginAuthenticationManager(AuthenticationManager):
     process. This is the default authentication manager for FlaskBB.
     """
 
-    def __init__(self, plugin_manager, session):
+    def __init__(self, plugin_manager, session, token_serializer):
         self.plugin_manager = plugin_manager
         self.session = session
+        self.token_serializer = token_serializer
 
     def authenticate(self, identifier, secret):
         try:
@@ -159,8 +161,10 @@ class PluginAuthenticationManager(AuthenticationManager):
             )
             if user is None:
                 raise StopAuthentication(_("Wrong username or password."))
+            token = self.token_serializer.dumps(
+                Token(user_id=user.id, operation=TokenActions.AUTH))
             self.plugin_manager.hook.flaskbb_post_authenticate(user=user)
-            return user
+            return token, user
         except StopAuthentication:
             self.plugin_manager.hook.flaskbb_authentication_failed(
                 identifier=identifier
