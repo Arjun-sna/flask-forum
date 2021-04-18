@@ -130,7 +130,7 @@ class Register(MethodView):
             return {'id': createdUser.id}
         except StopValidation as e:
             logger.exception(e)
-            return jsonify(e.reasons), 422
+            return e.reasons, 422
 
 
 class ForgotPassword(MethodView):
