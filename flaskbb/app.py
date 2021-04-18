@@ -55,7 +55,7 @@ from flaskbb.utils.settings import flaskbb_config
 from flaskbb.utils.translations import FlaskBBDomain
 
 from . import markup  # noqa
-from .auth import views as auth_views  # noqa
+from .auth import resources as auth_resources  # noqa
 from .deprecation import FlaskBBDeprecation
 from .display.navigation import NavigationContentType
 from .forum import views as forum_views  # noqa
