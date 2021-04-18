@@ -134,14 +134,11 @@ class Register(MethodView):
 
 
 class ForgotPassword(MethodView):
-    decorators = [anonymous_required]
 
     def __init__(self, password_reset_service_factory):
         self.password_reset_service_factory = password_reset_service_factory
 
     def post(self):
-        # form = self.form()
-        # if form.validate_on_submit():
         request_data = request.get_json()
         try:
             service = self.password_reset_service_factory()
