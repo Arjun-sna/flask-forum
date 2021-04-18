@@ -224,6 +224,7 @@ def configure_extensions(app):
 
     @jwt.user_loader_callback_loader
     def user_loader_callback(identify):
+        print("**************************************************************************************************************")
         user = User.query.filter_by(id=identify).first()
         return user
 
