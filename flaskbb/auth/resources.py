@@ -127,8 +127,8 @@ class Register(MethodView):
         try:
             user = user_registration_info_schema.load(request_data)
             service = self.registration_service_factory()
-            service.register(user)
-            return {'success': True}
+            createdUser = service.register(user)
+            return {'id': createdUser.id}
         except StopValidation as e:
             logger.exception(e)
             return jsonify(e.reasons), 422
