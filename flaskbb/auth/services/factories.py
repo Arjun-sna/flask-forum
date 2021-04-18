@@ -46,7 +46,9 @@ def account_activator_factory():
 
 
 def authentication_manager_factory():
-    return PluginAuthenticationManager(current_app.pluggy, db.session)
+    token_serializer = FlaskBBTokenSerializer(
+        current_app.config['SECRET_KEY'], expiry=timedelta(days=1))
+    return PluginAuthenticationManager(current_app.pluggy, db.session, token_serializer)
 
 
 def reauthentication_manager_factory():
