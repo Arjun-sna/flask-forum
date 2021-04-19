@@ -188,14 +188,14 @@ class RequestActivationToken(MethodView):
         request_data = request.get_json()
         activator = self.account_activator_factory()
         try:
-            activator.initiate_account_activation(form.email.data)
+            activator.initiate_account_activation(request_data['email'])
         except ValidationError as e:
             return jsonify(e.reasons), 401
         else:
             return {'success': True}
 
 
-class AutoActivateAccount(MethodView):
+class ActivateAccount(MethodView):
 
     def __init__(self, account_activator_factory):
         self.account_activator_factory = account_activator_factory
@@ -206,10 +206,9 @@ class AutoActivateAccount(MethodView):
         try:
             activator.activate_account(token)
         except TokenError as e:
-            return {'error': jsonify(e.reason)}, 422
+            return {'error': e.reason}, 422
         except ValidationError as e:
-            return {'error': jsonify(e.reason)}, 422
-
+            return {'error': e.reason}, 422
         else:
             db.session.commit()
             return {'success': True}, 200
@@ -309,19 +308,11 @@ def flaskbb_load_blueprints(app):
             account_activator_factory=account_activator_factory
         )
     )
-    register_view(
-        auth,
-        routes=['/activate/confirm'],
-        view_func=ActivateAccount.as_view(
-            'activate_account',
-            account_activator_factory=account_activator_factory
-        )
-    )
 
     register_view(
         auth,
         routes=['/activate/confirm/<token>'],
-        view_func=AutoActivateAccount.as_view(
+        view_func=ActivateAccount.as_view(
             'autoactivate_account',
             account_activator_factory=account_activator_factory
         )
