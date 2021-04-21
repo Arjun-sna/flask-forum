@@ -40,7 +40,7 @@ class DefaultConfig(object):
     # Note that localhost does not support subdomains so setting this to
     # “localhost” does not help.
     # Example for the FlaskBB forums: SERVER_NAME = "forums.flaskbb.org"
-    #SERVER_NAME =
+    # SERVER_NAME =
 
     # The preferred url scheme. In a productive environment it is highly
     # recommended to use 'https'.
@@ -259,14 +259,15 @@ class DefaultConfig(object):
     #   - Caching
     #   - Rate Limiting
     REDIS_ENABLED = False
-    REDIS_URL = "redis://localhost:6379"  # or with a password: "redis://:password@localhost:6379"
+    # or with a password: "redis://:password@localhost:6379"
+    REDIS_URL = "redis://localhost:6379"
     REDIS_DATABASE = 0
 
     # Celery
     CELERY_BROKER_URL = 'redis://localhost:6379'
     CELERY_RESULT_BACKEND = 'redis://localhost:6379'
-    BROKER_TRANSPORT_OPTIONS = {'max_retries': 1}  # necessary as there's no default
-
+    # necessary as there's no default
+    BROKER_TRANSPORT_OPTIONS = {'max_retries': 1}
 
     # FlaskBB Settings
     # ------------------------------ #
@@ -276,7 +277,6 @@ class DefaultConfig(object):
     MESSAGE_URL_PREFIX = "/message"
     AUTH_URL_PREFIX = "/auth"
     ADMIN_URL_PREFIX = "/admin"
-
 
     # Remove dead plugins - useful if you want to migrate your instance
     # somewhere else and forgot to reinstall the plugins.

@@ -229,7 +229,7 @@ def configure_extensions(app):
 
     @jwt.user_identity_loader
     def user_identity_loader(user):
-        return user.id
+        return user.user_id
 
     # Flask-Whooshee
     whooshee.init_app(app)

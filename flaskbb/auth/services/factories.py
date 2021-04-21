@@ -14,7 +14,7 @@ from datetime import timedelta
 from flask import current_app
 
 from ...extensions import db
-from ...tokens import FlaskBBTokenSerializer
+from ...tokens import FlaskBBTokenSerializer, AuthTokenSerializer
 from ...tokens.verifiers import EmailMatchesUserToken
 from ...user.models import User
 from .activation import AccountActivator
@@ -46,8 +46,7 @@ def account_activator_factory():
 
 
 def authentication_manager_factory():
-    token_serializer = FlaskBBTokenSerializer(
-        current_app.config['SECRET_KEY'], expiry=timedelta(days=1))
+    token_serializer = AuthTokenSerializer()
     return PluginAuthenticationManager(current_app.pluggy, db.session, token_serializer)
 
 
