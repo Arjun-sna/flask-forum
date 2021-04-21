@@ -180,35 +180,22 @@ class ResetPassword(MethodView):
 
 
 class RequestActivationToken(MethodView):
-    decorators = [requires_unactivated]
 
     def __init__(self, account_activator_factory):
         self.account_activator_factory = account_activator_factory
 
     def post(self):
-        form = self.form()
-        if form.validate_on_submit():
-            activator = self.account_activator_factory()
-            try:
-                activator.initiate_account_activation(form.email.data)
-            except ValidationError as e:
-                form.populate_errors([(e.attribute, e.reason)])
-            else:
-                flash(
-                    _(
-                        "A new account activation token has been sent to "
-                        "your email address."
-                    ), "success"
-                )
-                return redirect(url_for('forum.index'))
-
-        return render_template(
-            "auth/request_account_activation.html", form=form
-        )
+        request_data = request.get_json()
+        activator = self.account_activator_factory()
+        try:
+            activator.initiate_account_activation(request_data['email'])
+        except ValidationError as e:
+            return jsonify(e.reasons), 401
+        else:
+            return {'success': True}
 
 
-class AutoActivateAccount(MethodView):
-    decorators = [requires_unactivated]
+class ActivateAccount(MethodView):
 
     def __init__(self, account_activator_factory):
         self.account_activator_factory = account_activator_factory
@@ -219,62 +206,12 @@ class AutoActivateAccount(MethodView):
         try:
             activator.activate_account(token)
         except TokenError as e:
-            return {'error': jsonify(e.reason)}, 422
+            return {'error': e.reason}, 422
         except ValidationError as e:
-            return {'error': jsonify(e.reason)}, 422
-
+            return {'error': e.reason}, 422
         else:
             db.session.commit()
             return {'success': True}, 200
-
-
-class ActivateAccount(MethodView):
-    decorators = [requires_unactivated]
-    form = AccountActivationForm
-
-    def __init__(self, account_activator_factory):
-        self.account_activator_factory = account_activator_factory
-
-    def get(self):
-        return render_template(
-            "auth/account_activation.html",
-            form=self.form()
-        )
-
-    def post(self):
-        form = self.form()
-        if form.validate_on_submit():
-            token = form.token.data
-            activator = self.account_activator_factory()
-            try:
-                activator.activate_account(token)
-            except TokenError as e:
-                form.populate_errors([('token', e.reason)])
-            except ValidationError as e:
-                flash(e.reason, 'danger')
-                return redirect(url_for('forum.index'))
-
-            else:
-                try:
-                    db.session.commit()
-                except Exception:  # noqa
-                    logger.exception("Database error while activating account")
-                    db.session.rollback()
-                    flash(
-                        _(
-                            "Could not activate account due to an unrecoverable error"  # noqa
-                        ), "danger"
-                    )
-
-                    return redirect(url_for('auth.request_activation_token'))
-
-                flash(
-                    _("Your account has been activated and you can now login."),
-                    "success"
-                )
-                return redirect(url_for("forum.index"))
-
-        return render_template("auth/account_activation.html", form=form)
 
 
 @impl(tryfirst=True)
@@ -371,19 +308,11 @@ def flaskbb_load_blueprints(app):
             account_activator_factory=account_activator_factory
         )
     )
-    register_view(
-        auth,
-        routes=['/activate/confirm'],
-        view_func=ActivateAccount.as_view(
-            'activate_account',
-            account_activator_factory=account_activator_factory
-        )
-    )
 
     register_view(
         auth,
         routes=['/activate/confirm/<token>'],
-        view_func=AutoActivateAccount.as_view(
+        view_func=ActivateAccount.as_view(
             'autoactivate_account',
             account_activator_factory=account_activator_factory
         )

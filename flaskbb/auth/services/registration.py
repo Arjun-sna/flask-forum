@@ -143,13 +143,6 @@ class SendActivationPostProcessor(RegistrationPostProcessor):
 
     def post_process(self, user):
         self.account_activator.initiate_account_activation(user.email)
-        flash(
-            _(
-                "An account activation email has been sent to %(email)s",
-                email=user.email,
-            ),
-            "success",
-        )
 
 
 class AutologinPostProcessor(RegistrationPostProcessor):
