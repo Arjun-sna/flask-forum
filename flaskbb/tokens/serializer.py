@@ -7,8 +7,9 @@
     :license: BSD, see LICENSE for more details
 """
 
+from flask import current_app
 from datetime import timedelta
-
+from flask_jwt_extended import create_access_token
 from itsdangerous import (BadData, BadSignature, SignatureExpired,
                           TimedJSONWebSignatureSerializer)
 
@@ -16,6 +17,14 @@ from ..core import tokens
 
 
 _DEFAULT_EXPIRY = timedelta(hours=1)
+
+
+class AuthTokenSerializer(tokens.TokenSerializer):
+    def dumps(self, token_data):
+        return create_access_token(token_data)
+
+    def loads(self):
+        pass
 
 
 class FlaskBBTokenSerializer(tokens.TokenSerializer):

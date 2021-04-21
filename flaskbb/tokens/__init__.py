@@ -7,6 +7,6 @@
     :license: BSD, see LICENSE for more details
 """
 
-from .serializer import FlaskBBTokenSerializer
+from .serializer import FlaskBBTokenSerializer, AuthTokenSerializer
 
 __all__ = ("FlaskBBTokenSerializer",)
