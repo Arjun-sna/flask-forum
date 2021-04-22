@@ -222,7 +222,7 @@ def configure_extensions(app):
 
     ma.init_app(app)
 
-    @jwt.user_loader_callback_loader
+    @jwt.user_lookup_loader
     def user_loader_callback(identify):
         user = User.query.filter_by(id=identify).first()
         return user
