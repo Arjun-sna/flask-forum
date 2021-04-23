@@ -65,8 +65,8 @@ def flaskbb_authentication_failed(identifier):
 
 
 @impl(trylast=True)
-def flaskbb_reauth_attempt(user, secret):
-    return DefaultFlaskBBReauthProvider().reauthenticate(user, secret)
+def flaskbb_reauth_attempt(user):
+    return DefaultFlaskBBReauthProvider().reauthenticate(user)
 
 
 @impl

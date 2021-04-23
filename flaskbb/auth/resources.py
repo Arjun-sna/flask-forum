@@ -17,14 +17,6 @@ from flask.views import MethodView
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required, current_user
 from flask_babelplus import gettext as _
 from marshmallow.exceptions import ValidationError as DataError
-from flask_login import (
-    confirm_login,
-    current_user,
-    login_fresh,
-    login_required,
-    login_user,
-    logout_user,
-)
 
 from flaskbb.auth.forms import (
     AccountActivationForm,
@@ -84,18 +76,17 @@ class Login(MethodView):
         credentials = request.get_json()
         auth_manager = self.authentication_manager_factory()
         try:
-            access_token, user = auth_manager.authenticate(
+            token, user = auth_manager.authenticate(
                 identifier=credentials['username'], secret=credentials['password']
             )
-            return {'token': access_token}, 200
+            return {'access_token': token[0], 'refresh_token': token[1]}, 200
         except StopAuthentication as e:
             logger.exception(e)
             return e.reason, 401
 
 
 class Reauth(MethodView):
-    decorators = [login_required, limiter.exempt]
-    form = ReauthForm
+    decorators = [jwt_required(refresh=True), limiter.exempt]
 
     def __init__(self, reauthentication_factory):
         self.reauthentication_factory = reauthentication_factory
@@ -105,11 +96,10 @@ class Reauth(MethodView):
 
         reauth_manager = self.reauthentication_factory()
         try:
-            reauth_manager.reauthenticate(
-                user=current_user, secret=request_data['password']
+            token, user = reauth_manager.reauthenticate(
+                user=current_user
             )
-            access_token = create_access_token(current_user)
-            return {'token': access_token}, 200
+            return {'access_token': token[0], 'refresh_token': token[1]}, 200
         except StopAuthentication as e:
             logger.exception(e)
             return e.reason, 401

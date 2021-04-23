@@ -9,7 +9,7 @@
 
 from flask import current_app
 from datetime import timedelta
-from flask_jwt_extended import create_access_token
+from flask_jwt_extended import create_access_token, create_refresh_token
 from itsdangerous import (BadData, BadSignature, SignatureExpired,
                           TimedJSONWebSignatureSerializer)
 
@@ -21,7 +21,7 @@ _DEFAULT_EXPIRY = timedelta(hours=1)
 
 class AuthTokenSerializer(tokens.TokenSerializer):
     def dumps(self, token_data):
-        return create_access_token(token_data)
+        return [create_access_token(token_data), create_refresh_token(token_data)]
 
     def loads(self):
         pass
