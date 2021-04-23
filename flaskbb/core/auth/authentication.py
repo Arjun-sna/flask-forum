@@ -181,7 +181,7 @@ class ReauthenticateManager(ABC):
     """
 
     @abstractmethod
-    def reauthenticate(self, user, secret):
+    def reauthenticate(self, user):
         """
         This method is abstract.
 
@@ -191,7 +191,7 @@ class ReauthenticateManager(ABC):
         """
         pass
 
-    def __call__(self, user, secret):
+    def __call__(self, user):
         pass
 
 

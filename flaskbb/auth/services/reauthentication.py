@@ -12,6 +12,7 @@ import logging
 
 from flask_babelplus import gettext as _
 from werkzeug.security import check_password_hash
+from ...core.tokens import TokenActions, Token
 
 from ...core.auth.authentication import (PostReauthenticateHandler,
                                          ReauthenticateFailureHandler,
@@ -29,8 +30,8 @@ class DefaultFlaskBBReauthProvider(ReauthenticateProvider):
     password against the current user's hashed password.
     """
 
-    def reauthenticate(self, user, secret):
-        if check_password_hash(user.password, secret):  # pragma: no branch
+    def reauthenticate(self, user):
+        if user:  # pragma: no branch
             return True
 
 
@@ -61,18 +62,22 @@ class PluginReauthenticationManager(ReauthenticateManager):
     to manage the reauthentication flow.
     """
 
-    def __init__(self, plugin_manager, session):
+    def __init__(self, plugin_manager, session, token_serializer):
         self.plugin_manager = plugin_manager
         self.session = session
+        self.token_serializer = token_serializer
 
-    def reauthenticate(self, user, secret):
+    def reauthenticate(self, user):
         try:
             result = self.plugin_manager.hook.flaskbb_reauth_attempt(
-                user=user, secret=secret
+                user=user
             )
             if not result:
-                raise StopAuthentication(_("Wrong password."))
+                raise StopAuthentication(_("Verification failed."))
             self.plugin_manager.hook.flaskbb_post_reauth(user=user)
+            token = self.token_serializer.dumps(
+                Token(user_id=user.id, operation=TokenActions.AUTH))
+            return token, user
         except StopAuthentication:
             self.plugin_manager.hook.flaskbb_reauth_failed(user=user)
             raise

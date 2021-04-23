@@ -416,7 +416,7 @@ def flaskbb_authentication_failed(identifier):
 
 
 @spec(firstresult=True)
-def flaskbb_reauth_attempt(user, secret):
+def flaskbb_reauth_attempt(user):
     """Hook for handling reauth in FlaskBB
 
     These hooks receive the currently authenticated user
@@ -436,15 +436,15 @@ def flaskbb_reauth_attempt(user, secret):
     Example of checking secret or passing to the next implementer::
 
         @impl
-        def flaskbb_reauth_attempt(user, secret):
-            if check_password(user.password, secret):
+        def flaskbb_reauth_attempt(user):
+            if verify_user(user):
                 return True
 
 
     Example of forcefully ending reauth::
 
         @impl
-        def flaskbb_reauth_attempt(user, secret):
+        def flaskbb_reauth_attempt(user):
             if user.login_attempts > 5:
                 raise StopAuthentication(
                     _("Too many failed authentication attempts")

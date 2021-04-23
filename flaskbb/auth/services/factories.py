@@ -51,4 +51,5 @@ def authentication_manager_factory():
 
 
 def reauthentication_manager_factory():
-    return PluginReauthenticationManager(current_app.pluggy, db.session)
+    token_serializer = AuthTokenSerializer()
+    return PluginReauthenticationManager(current_app.pluggy, db.session, token_serializer)
