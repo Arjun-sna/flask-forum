@@ -420,7 +420,7 @@ def time_diff():
 
 def _get_user_locale():
     locale = flaskbb_config.get("DEFAULT_LANGUAGE", "en")
-    if current_user.is_authenticated and current_user.language is not None:
+    if current_user and current_user.is_authenticated and current_user.language is not None:
         locale = current_user.language
     return locale
 
