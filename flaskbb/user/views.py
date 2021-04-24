@@ -32,12 +32,12 @@ from .services.factories import (
     settings_form_factory,
     settings_update_handler,
 )
-from ..core.auth.registration import UserRegistrationInputSchema
+from ..core.user.profile import UserProfileSchema
 
 impl = HookimplMarker("flaskbb")
 
 logger = logging.getLogger(__name__)
-user_schema = UserRegistrationInputSchema()
+user_profile_schema = UserProfileSchema()
 
 
 @attr.s(frozen=True, cmp=False, hash=False, repr=True)
@@ -198,7 +198,7 @@ class UserProfile(MethodView):  # pragma: no cover
     def get(self, username):
         user = User.query.filter_by(username=username).first()
         # return render_template("user/profile.html", user=user)
-        user_data = user_schema.dump(user)
+        user_data = user_profile_schema.dump(user)
         if user:
             return user_data
         else:
