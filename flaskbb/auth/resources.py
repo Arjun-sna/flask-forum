@@ -18,23 +18,11 @@ from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_requir
 from flask_babelplus import gettext as _
 from marshmallow.exceptions import ValidationError as DataError
 
-from flaskbb.auth.forms import (
-    AccountActivationForm,
-    ForgotPasswordForm,
-    LoginForm,
-    LoginRecaptchaForm,
-    ReauthForm,
-    RegisterForm,
-    RequestActivationForm,
-    ResetPasswordForm,
-)
 from flaskbb.extensions import db, limiter
 from flaskbb.utils.helpers import (
     anonymous_required,
     enforce_recaptcha,
     format_timedelta,
-    get_available_languages,
-    redirect_or_next,
     register_view,
     registration_enabled,
     render_template,
@@ -57,15 +45,6 @@ from .services import (
 
 logger = logging.getLogger(__name__)
 user_registration_info_schema = UserRegistrationInputSchema()
-
-
-# class Logout(MethodView):
-#     decorators = [limiter.exempt, login_required]
-
-#     def get(self):
-#         logout_user()
-#         flash(_("Logged out"), "success")
-#         return redirect(url_for("forum.index"))
 
 
 class Login(MethodView):
@@ -106,7 +85,7 @@ class Reauth(MethodView):
 
 
 class Register(MethodView):
-    decorators = [anonymous_required, registration_enabled]
+    decorators = [registration_enabled]
 
     def __init__(self, registration_service_factory):
         self.registration_service_factory = registration_service_factory
@@ -141,8 +120,6 @@ class ForgotPassword(MethodView):
 
 
 class ResetPassword(MethodView):
-    decorators = [anonymous_required]
-
     def __init__(self, password_reset_service_factory):
         self.password_reset_service_factory = password_reset_service_factory
 
@@ -237,16 +214,13 @@ def flaskbb_load_blueprints(app):
     def login_rate_limit_error(error):
         """Register a custom error handler for a 'Too Many Requests'
         (HTTP CODE 429) error."""
-        return render_template(
-            "errors/too_many_logins.html", timeout=error.description
-        )
+        return 'Too may logins. Please try again in {}'.format(error.description), 429
 
     # Activate rate limiting on the whole blueprint
     limiter.limit(
         login_rate_limit, error_message=login_rate_limit_message
     )(auth)
 
-    # register_view(auth, routes=['/logout'], view_func=Logout.as_view('logout'))
     register_view(
         auth,
         routes=['/login'],
