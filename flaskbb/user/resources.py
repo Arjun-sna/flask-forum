@@ -12,10 +12,11 @@
 import logging
 
 import attr
-from flask import Blueprint, flash, redirect, request, url_for
+from flask import Blueprint, flash, redirect, request, url_for, jsonify
 from flask.views import MethodView
 from flask_babelplus import gettext as _
 from flask_login import current_user, login_required
+from flask_jwt_extended import jwt_required
 from pluggy import HookimplMarker
 
 from flaskbb.user.models import User
@@ -32,10 +33,12 @@ from .services.factories import (
     settings_form_factory,
     settings_update_handler,
 )
+from ..core.user.profile import UserProfileSchema
 
 impl = HookimplMarker("flaskbb")
 
 logger = logging.getLogger(__name__)
+user_profile_schema = UserProfileSchema()
 
 
 @attr.s(frozen=True, cmp=False, hash=False, repr=True)
@@ -193,9 +196,15 @@ class AllUserPosts(MethodView):  # pragma: no cover
 
 
 class UserProfile(MethodView):  # pragma: no cover
+    decorators = [jwt_required()]
+
     def get(self, username):
-        user = User.query.filter_by(username=username).first_or_404()
-        return render_template("user/profile.html", user=user)
+        user = User.query.filter_by(username=username).first()
+        user_data = user_profile_schema.dump(user)
+        if user:
+            return user_data
+        else:
+            return {'error': 'Not found'}, 400
 
 
 @impl(tryfirst=True)
