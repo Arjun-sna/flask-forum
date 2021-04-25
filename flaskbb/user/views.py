@@ -16,6 +16,7 @@ from flask import Blueprint, flash, redirect, request, url_for, jsonify
 from flask.views import MethodView
 from flask_babelplus import gettext as _
 from flask_login import current_user, login_required
+from flask_jwt_extended import jwt_required
 from pluggy import HookimplMarker
 
 from flaskbb.user.models import User
@@ -195,9 +196,10 @@ class AllUserPosts(MethodView):  # pragma: no cover
 
 
 class UserProfile(MethodView):  # pragma: no cover
+    decorators = [jwt_required()]
+
     def get(self, username):
         user = User.query.filter_by(username=username).first()
-        # return render_template("user/profile.html", user=user)
         user_data = user_profile_schema.dump(user)
         if user:
             return user_data
