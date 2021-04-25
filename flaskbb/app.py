@@ -60,7 +60,7 @@ from .deprecation import FlaskBBDeprecation
 from .display.navigation import NavigationContentType
 from .forum import views as forum_views  # noqa
 from .management import views as management_views  # noqa
-from .user import views as user_views  # noqa
+from .user import resources as user_resources  # noqa
 
 logger = logging.getLogger(__name__)
 
