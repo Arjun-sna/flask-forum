@@ -2,6 +2,9 @@ from flask.views import MethodView
 from flaskbb.extensions import allows
 
 from flaskbb.forum.models import Category
+from ..schemas import CategorySchema
+
+category_schema = CategorySchema()
 
 
 class Forum(MethodView()):
@@ -18,4 +21,4 @@ class Forum(MethodView()):
 
     def get(self):
         categories = Category.query.order_by(Category.position.asc()).all()
-        return categories
+        return category_schema.dump(categories)
