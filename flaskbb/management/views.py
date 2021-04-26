@@ -20,6 +20,7 @@ from flask_allows import Not, Permission
 from flask_babelplus import gettext as _
 from flask_login import current_user, login_fresh
 from pluggy import HookimplMarker
+from flask_jwt_extended import verify_jwt_in_request
 
 from flaskbb import __version__ as flaskbb_version
 from flaskbb.extensions import allows, celery, db
@@ -40,7 +41,9 @@ from flaskbb.utils.requirements import (CanBanUser, CanEditUser, IsAdmin,
                                         IsAtleastModerator,
                                         IsAtleastSuperModerator)
 from flaskbb.utils.settings import flaskbb_config
+from .schemas import CategorySchema
 
+category_schema = CategorySchema(many=True)
 impl = HookimplMarker('flaskbb')
 
 logger = logging.getLogger(__name__)
@@ -435,9 +438,9 @@ class BanUser(MethodView):
             for user in users:
                 # don't let a user ban himself and do not allow a moderator
                 # to ban a admin user
-                if (current_user.id == user.id or
-                        Permission(IsAdmin, identity=user) and
-                        Permission(Not(IsAdmin), current_user)):
+                if (current_user.id == user.id
+                        or Permission(IsAdmin, identity=user)
+                        and Permission(Not(IsAdmin), current_user)):
                     continue
 
                 elif user.ban():
@@ -691,20 +694,21 @@ class DeleteGroup(MethodView):
 
 
 class Forums(MethodView):
-    decorators = [
-        allows.requires(
-            IsAdmin,
-            on_fail=FlashAndRedirect(
-                message=_("You are not allowed to modify forums."),
-                level="danger",
-                endpoint="management.overview"
-            )
-        )
-    ]
+    # decorators = [
+    #     allows.requires(
+    #         IsAdmin,
+    #         on_fail=FlashAndRedirect(
+    #             message=_("You are not allowed to modify forums."),
+    #             level="danger",
+    #             endpoint="management.overview"
+    #         )
+    #     )
+    # ]
 
     def get(self):
         categories = Category.query.order_by(Category.position.asc()).all()
-        return render_template("management/forums.html", categories=categories)
+        result = category_schema.jsonify(categories)
+        return result, 200
 
 
 class EditForum(MethodView):
@@ -1308,8 +1312,7 @@ def flaskbb_load_blueprints(app):
     def check_fresh_login():
         """Checks if the login is fresh for the current user, otherwise the user
         has to reauthenticate."""
-        if not login_fresh():
-            return current_app.login_manager.needs_refresh()
+        verify_jwt_in_request()
 
     # Categories
     register_view(
