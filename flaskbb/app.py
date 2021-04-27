@@ -348,21 +348,21 @@ def configure_errorhandlers(app):
 
     @app.errorhandler(403)
     def forbidden_page(error):
-        return 'forbidden', 403
+        return {'error': 'forbidden'}, 403
 
     @app.errorhandler(404)
     def page_not_found(error):
-        return 'Not found', 404
+        return {'error': 'Not found'}, 404
 
     @app.errorhandler(500)
     def server_error_page(error):
         logger.exception(error)
-        return 'Internal server error', 500
+        return {'error': 'Internal server error'}, 500
 
     @app.errorhandler(Exception)
     def unhandled_server_error_page(error):
         logger.exception(error)
-        return 'Internal server error', 500
+        return {'error': 'Internal server error'}, 500
 
     app.pluggy.hook.flaskbb_errorhandlers(app=app)
 
