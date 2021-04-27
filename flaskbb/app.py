@@ -17,7 +17,7 @@ import warnings
 from datetime import datetime
 
 from flask import Flask, request
-from flask_login import current_user
+from flask_jwt_extended import current_user, verify_jwt_in_request
 from sqlalchemy import event
 from sqlalchemy.engine import Engine
 from sqlalchemy.exc import OperationalError, ProgrammingError
@@ -324,9 +324,9 @@ def configure_before_handlers(app):
 
     @app.before_request
     def update_lastseen():
-        """Updates `lastseen` before every reguest if the user is
+        """Updates `lastseen` before every request if the user is
         authenticated."""
-        if current_user.is_authenticated:
+        if verify_jwt_in_request(optional=True) is not None:
             current_user.lastseen = time_utcnow()
             db.session.add(current_user)
             db.session.commit()
@@ -335,7 +335,7 @@ def configure_before_handlers(app):
 
         @app.before_request
         def mark_current_user_online():
-            if current_user.is_authenticated:
+            if verify_jwt_in_request(optional=True) is not None:
                 mark_online(current_user.username)
             else:
                 mark_online(request.remote_addr, guest=True)
@@ -387,7 +387,6 @@ def configure_translations(app):
         # if a user is logged in, use the locale from the user settings
         if (
             current_user
-            and current_user.is_authenticated
             and current_user.language
         ):
             return current_user.language
