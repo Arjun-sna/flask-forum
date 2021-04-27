@@ -694,16 +694,9 @@ class DeleteGroup(MethodView):
 
 
 class Forums(MethodView):
-    # decorators = [
-    #     allows.requires(
-    #         IsAdmin,
-    #         on_fail=FlashAndRedirect(
-    #             message=_("You are not allowed to modify forums."),
-    #             level="danger",
-    #             endpoint="management.overview"
-    #         )
-    #     )
-    # ]
+    decorators = [
+        allows.requires(IsAdmin)
+    ]
 
     def get(self):
         categories = Category.query.order_by(Category.position.asc()).all()
