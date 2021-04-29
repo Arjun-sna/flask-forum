@@ -48,8 +48,6 @@ db = SQLAlchemy(metadata=metadata)
 # Whooshee (Full Text Search)
 whooshee = Whooshee()
 
-# Login
-login_manager = LoginManager()
 
 # Mail
 mail = Mail()
