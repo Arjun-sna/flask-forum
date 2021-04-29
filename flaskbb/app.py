@@ -250,14 +250,14 @@ def configure_extensions(app):
     ]
     login_manager.anonymous_user = Guest
 
-    @login_manager.user_loader
-    def load_user(user_id):
-        """Loads the user. Required by the `login` extension."""
-        user_instance = User.query.filter_by(id=user_id).first()
-        if user_instance:
-            return user_instance
-        else:
-            return None
+    # @login_manager.user_loader
+    # def load_user(user_id):
+    #     """Loads the user. Required by the `login` extension."""
+    #     user_instance = User.query.filter_by(id=user_id).first()
+    #     if user_instance:
+    #         return user_instance
+    #     else:
+    #         return None
 
     login_manager.init_app(app)
 
