@@ -25,7 +25,7 @@ from sqlalchemy.exc import OperationalError, ProgrammingError
 from flaskbb._compat import iteritems, string_types
 # extensions
 from flaskbb.extensions import (alembic, allows, babel, cache, celery, csrf,
-                                db, debugtoolbar, limiter, login_manager, mail,
+                                db, debugtoolbar, limiter, mail,
                                 redis_store, themes, whooshee, jwt, ma)
 from flaskbb.plugins import spec
 from flaskbb.plugins.manager import FlaskBBPluginManager
@@ -240,26 +240,6 @@ def configure_extensions(app):
         whooshee.register_whoosheer(TopicWhoosheer)
         whooshee.register_whoosheer(ForumWhoosheer)
         whooshee.register_whoosheer(UserWhoosheer)
-
-    # Flask-Login
-    login_manager.login_view = app.config["LOGIN_VIEW"]
-    login_manager.refresh_view = app.config["REAUTH_VIEW"]
-    login_manager.login_message_category = app.config["LOGIN_MESSAGE_CATEGORY"]
-    login_manager.needs_refresh_message_category = app.config[
-        "REFRESH_MESSAGE_CATEGORY"
-    ]
-    login_manager.anonymous_user = Guest
-
-    # @login_manager.user_loader
-    # def load_user(user_id):
-    #     """Loads the user. Required by the `login` extension."""
-    #     user_instance = User.query.filter_by(id=user_id).first()
-    #     if user_instance:
-    #         return user_instance
-    #     else:
-    #         return None
-
-    login_manager.init_app(app)
 
 
 def configure_template_filters(app):
