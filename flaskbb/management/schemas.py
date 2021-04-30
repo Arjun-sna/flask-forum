@@ -2,6 +2,11 @@ from marshmallow import fields
 from flaskbb.extensions import ma
 
 
+class ForumInputSchema(ma.SQLAlchemySchema):
+    class Meta:
+        load_instance = True
+
+
 class ForumSchema(ma.Schema):
     id = fields.Integer()
     title = fields.String()
