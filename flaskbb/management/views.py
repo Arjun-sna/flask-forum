@@ -757,14 +757,7 @@ class EditForum(MethodView):
 
 class AddForum(MethodView):
     decorators = [
-        allows.requires(
-            IsAdmin,
-            on_fail=FlashAndRedirect(
-                message=_("You are not allowed to modify forums."),
-                level="danger",
-                endpoint="management.overview"
-            )
-        )
+        allows.requires(IsAdmin)
     ]
     form = AddForumForm
 
