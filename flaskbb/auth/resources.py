@@ -31,7 +31,7 @@ from flaskbb.utils.helpers import (
 from flaskbb.utils.settings import flaskbb_config
 
 from ..core.auth.authentication import StopAuthentication
-from ..core.auth.registration import UserRegistrationInfo, UserRegistrationInputSchema
+from .schemas import UserRegistrationInputSchema
 from ..core.exceptions import PersistenceError, StopValidation, ValidationError
 from ..core.tokens import TokenError
 from .plugins import impl

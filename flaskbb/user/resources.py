@@ -33,7 +33,7 @@ from .services.factories import (
     settings_form_factory,
     settings_update_handler,
 )
-from ..core.user.profile import UserProfileSchema
+from ..core.user.schemas import UserProfileSchema
 
 impl = HookimplMarker("flaskbb")
 
