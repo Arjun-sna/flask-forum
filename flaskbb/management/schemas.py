@@ -5,13 +5,11 @@ from flaskbb.forum.models import Forum
 from flaskbb.user.models import Group
 
 
-class GroupSchema(ma.SQLAlchemySchema):
+class GroupSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Group
         load_instance = True
         sqla_session = db.session
-
-    id = fields.Integer()
 
 
 class ForumInputSchema(ma.SQLAlchemySchema):
@@ -27,7 +25,7 @@ class ForumInputSchema(ma.SQLAlchemySchema):
     locked = fields.Boolean()
     show_moderators = fields.Boolean()
     external = fields.String()
-    groups = fields.Nested("GroupSchema", many=True)
+    groups = fields.Nested("GroupSchema", many=True, only=('id',))
 
 
 class ForumSchema(ma.Schema):

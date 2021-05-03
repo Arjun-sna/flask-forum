@@ -793,7 +793,8 @@ class AddForum(MethodView):
         # )
         request_data = request.get_json()
         forum_data = forum_input_schema.load(request_data)
-        print(request_data)
+        forum_data.save()
+        return {"success": True}, 200
 
 
 class DeleteForum(MethodView):
