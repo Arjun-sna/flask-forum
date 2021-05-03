@@ -41,9 +41,10 @@ from flaskbb.utils.requirements import (CanBanUser, CanEditUser, IsAdmin,
                                         IsAtleastModerator,
                                         IsAtleastSuperModerator)
 from flaskbb.utils.settings import flaskbb_config
-from .schemas import CategorySchema
+from .schemas import CategorySchema, ForumInputSchema
 
 category_schema = CategorySchema(many=True)
+forum_input_schema = ForumInputSchema()
 impl = HookimplMarker('flaskbb')
 
 logger = logging.getLogger(__name__)
@@ -759,37 +760,40 @@ class AddForum(MethodView):
     decorators = [
         allows.requires(IsAdmin)
     ]
-    form = AddForumForm
+    # form = AddForumForm
 
-    def get(self, category_id=None):
-        form = self.form()
+    # def get(self, category_id=None):
+    #     form = self.form()
 
-        form.groups.data = Group.query.order_by(Group.id.asc()).all()
+    #     form.groups.data = Group.query.order_by(Group.id.asc()).all()
 
-        if category_id:
-            category = Category.query.filter_by(id=category_id).first()
-            form.category.data = category
+    #     if category_id:
+    #         category = Category.query.filter_by(id=category_id).first()
+    #         form.category.data = category
 
-        return render_template(
-            'management/forum_form.html', form=form, title=_('Add Forum')
-        )
+    #     return render_template(
+    #         'management/forum_form.html', form=form, title=_('Add Forum')
+    #     )
 
     def post(self, category_id=None):
-        form = self.form()
+        # form = self.form()
 
-        if form.validate_on_submit():
-            form.save()
-            flash(_('Forum added.'), 'success')
-            return redirect(url_for('management.forums'))
-        else:
-            form.groups.data = Group.query.order_by(Group.id.asc()).all()
-            if category_id:
-                category = Category.query.filter_by(id=category_id).first()
-                form.category.data = category
+        # if form.validate_on_submit():
+        #     form.save()
+        #     flash(_('Forum added.'), 'success')
+        #     return redirect(url_for('management.forums'))
+        # else:
+        #     form.groups.data = Group.query.order_by(Group.id.asc()).all()
+        #     if category_id:
+        #         category = Category.query.filter_by(id=category_id).first()
+        #         form.category.data = category
 
-        return render_template(
-            'management/forum_form.html', form=form, title=_('Add Forum')
-        )
+        # return render_template(
+        #     'management/forum_form.html', form=form, title=_('Add Forum')
+        # )
+        request_data = request.get_json()
+        forum_data = forum_input_schema.load(request_data)
+        print(request_data)
 
 
 class DeleteForum(MethodView):
