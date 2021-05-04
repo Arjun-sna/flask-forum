@@ -776,25 +776,10 @@ class AddForum(MethodView):
     #     )
 
     def post(self, category_id=None):
-        # form = self.form()
-
-        # if form.validate_on_submit():
-        #     form.save()
-        #     flash(_('Forum added.'), 'success')
-        #     return redirect(url_for('management.forums'))
-        # else:
-        #     form.groups.data = Group.query.order_by(Group.id.asc()).all()
-        #     if category_id:
-        #         category = Category.query.filter_by(id=category_id).first()
-        #         form.category.data = category
-
-        # return render_template(
-        #     'management/forum_form.html', form=form, title=_('Add Forum')
-        # )
         request_data = request.get_json()
         forum_data = forum_input_schema.load(request_data)
-        forum_data.save()
-        return {"success": True}, 200
+        created_forum = forum_data.save()
+        return {"id": created_forum.id}, 200
 
 
 class DeleteForum(MethodView):
