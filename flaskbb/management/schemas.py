@@ -1,5 +1,39 @@
 from marshmallow import fields
-from flaskbb.extensions import ma
+from flaskbb.extensions import ma, db
+
+from flaskbb.forum.models import Forum, Category
+from flaskbb.user.models import Group
+
+
+class GroupSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = Group
+        load_instance = True
+        sqla_session = db.session
+
+
+class CategorySchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = Category
+        load_instance = True
+        sqla_session = db.session
+
+
+class ForumInputSchema(ma.SQLAlchemySchema):
+    class Meta:
+        model = Forum
+        load_instance = True
+        sqla_session = db.session
+
+    # category_id = fields.Integer()
+    category = fields.Nested("CategorySchema", only=('id',), required=True)
+    title = fields.String()
+    description = fields.String()
+    position = fields.Integer()
+    locked = fields.Boolean()
+    show_moderators = fields.Boolean()
+    external = fields.String()
+    groups = fields.Nested("GroupSchema", many=True, only=('id',))
 
 
 class ForumSchema(ma.Schema):
