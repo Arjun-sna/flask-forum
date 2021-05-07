@@ -6,13 +6,6 @@ from flaskbb.forum.models import Forum, Category
 from flaskbb.user.models import Group
 
 
-class GroupSchema(ma.SQLAlchemyAutoSchema):
-    class Meta:
-        model = Group
-        load_instance = True
-        sqla_session = db.session
-
-
 class ForumInputSchema(ma.Schema):
     category = fields.Integer(required=True)
     title = fields.String(required=True, validate=Length(3))
@@ -21,7 +14,8 @@ class ForumInputSchema(ma.Schema):
     locked = fields.Boolean(default=False)
     show_moderators = fields.Boolean(default=False)
     external = fields.String()
-    groups = fields.List(fields.Integer(required=True), required=True)
+    groups = fields.List(fields.Integer(), required=True,
+                         validate=Length(min=1))
 
 
 class ForumSchema(ma.Schema):

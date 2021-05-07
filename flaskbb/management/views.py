@@ -782,8 +782,6 @@ class AddForum(MethodView):
     def post(self, category_id=None):
         request_data = request.get_json()
         created_forum = self.forum_manager.addForum(request_data)
-        # forum_data = forum_input_schema.load(request_data)
-        # created_forum = forum_data.save()
         return {"id": created_forum.id}, 200
 
 
