@@ -16,7 +16,7 @@ import time
 import warnings
 from datetime import datetime
 
-from flask import Flask, request
+from flask import Flask, request, jsonify
 from flask_jwt_extended import current_user, verify_jwt_in_request
 from sqlalchemy import event
 from sqlalchemy.engine import Engine
@@ -53,6 +53,7 @@ from flaskbb.utils.search import (ForumWhoosheer, PostWhoosheer,
 # app specific configurations
 from flaskbb.utils.settings import flaskbb_config
 from flaskbb.utils.translations import FlaskBBDomain
+from flaskbb.core.exceptions import ValidationError
 
 from . import markup  # noqa
 from .auth import resources as auth_resources  # noqa
@@ -325,6 +326,10 @@ def configure_before_handlers(app):
 
 def configure_errorhandlers(app):
     """Configures the error handlers."""
+    @app.errorhandler(ValidationError)
+    def data_validation_error(error):
+        logger.exception(error)
+        return {'error': error.reason}, 400
 
     @app.errorhandler(403)
     def forbidden_page(error):
