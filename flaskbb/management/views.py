@@ -42,6 +42,7 @@ from flaskbb.utils.requirements import (CanBanUser, CanEditUser, IsAdmin,
                                         IsAtleastSuperModerator)
 from flaskbb.utils.settings import flaskbb_config
 from .schemas import CategorySchema, ForumInputSchema
+from .services.forum import ForumManager
 
 category_schema = CategorySchema(many=True)
 forum_input_schema = ForumInputSchema()
@@ -760,6 +761,9 @@ class AddForum(MethodView):
     decorators = [
         allows.requires(IsAdmin)
     ]
+
+    def __init__(self, forum_manager: ForumManager):
+        self.forum_manager = forum_manager
     # form = AddForumForm
 
     # def get(self, category_id=None):
@@ -777,8 +781,7 @@ class AddForum(MethodView):
 
     def post(self, category_id=None):
         request_data = request.get_json()
-        forum_data = forum_input_schema.load(request_data)
-        created_forum = forum_data.save()
+        created_forum = self.forum_manager.addForum(request_data)
         return {"id": created_forum.id}, 200
 
 
@@ -1311,7 +1314,7 @@ def flaskbb_load_blueprints(app):
     register_view(
         management,
         routes=['/forums/add', '/forums/<int:category_id>/add'],
-        view_func=AddForum.as_view('add_forum')
+        view_func=AddForum.as_view('add_forum', forum_manager=ForumManager())
     )
     register_view(
         management,
