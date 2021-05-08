@@ -768,6 +768,10 @@ class Forums(MethodView):
         updated_forum = self.forum_manager.updateForum(request_data)
         return {"id": updated_forum.id}, 200
 
+    def delete(self, forum_id=None):
+        self.forum_manager.delete_forum(forum_id)
+        return {'success': True}, 200
+
 
 class DeleteForum(MethodView):
     decorators = [
