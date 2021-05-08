@@ -41,11 +41,10 @@ from flaskbb.utils.requirements import (CanBanUser, CanEditUser, IsAdmin,
                                         IsAtleastModerator,
                                         IsAtleastSuperModerator)
 from flaskbb.utils.settings import flaskbb_config
-from .schemas import CategorySchema, ForumInputSchema
+from .schemas import CategorySchema
 from .services.forum import ForumManager
 
 category_schema = CategorySchema(many=True)
-forum_input_schema = ForumInputSchema()
 impl = HookimplMarker('flaskbb')
 
 logger = logging.getLogger(__name__)
