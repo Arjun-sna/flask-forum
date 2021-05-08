@@ -1,6 +1,6 @@
 from sqlalchemy.orm.session import make_transient, make_transient_to_detached
 
-from ..schemas import ForumInputSchema, ForumUpdateSchema
+from ..schemas import ForumInputSchema, ForumUpdateSchema, CategorySchema
 from ...forum.models import Forum, Category
 from ...user.models import Group
 from ...core.exceptions import ValidationError
@@ -10,6 +10,7 @@ class ForumManager():
     def __init__(self):
         self.forum_input_schema = ForumInputSchema()
         self.forum_update_schema = ForumUpdateSchema()
+        self.category_schema = CategorySchema(many=True)
 
     def __fetch_category(self, category_id):
         category = Category.query.get(category_id)
@@ -26,6 +27,10 @@ class ForumManager():
             raise ValidationError(
                 "groups", "The provided groups either does not exist or not active")
         return groups
+
+    def get_all_forums(self):
+        categories = Category.query.order_by(Category.position.asc()).all()
+        return self.category_schema.dump(categories)
 
     def addForum(self, forum_data):
         data = self.forum_input_schema.load(forum_data)

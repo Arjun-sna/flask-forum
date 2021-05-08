@@ -763,20 +763,10 @@ class AddForum(MethodView):
 
     def __init__(self, forum_manager: ForumManager):
         self.forum_manager = forum_manager
-    # form = AddForumForm
 
-    # def get(self, category_id=None):
-    #     form = self.form()
-
-    #     form.groups.data = Group.query.order_by(Group.id.asc()).all()
-
-    #     if category_id:
-    #         category = Category.query.filter_by(id=category_id).first()
-    #         form.category.data = category
-
-    #     return render_template(
-    #         'management/forum_form.html', form=form, title=_('Add Forum')
-    #     )
+    def get(self):
+        categories = self.forum_manager.get_all_forums()
+        return jsonify(categories), 200
 
     def post(self, category_id=None):
         request_data = request.get_json()
