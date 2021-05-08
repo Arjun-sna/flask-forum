@@ -18,6 +18,18 @@ class ForumInputSchema(ma.Schema):
                          validate=Length(min=1))
 
 
+class ForumUpdateSchema(ma.Schema):
+    id = fields.Integer(required=True)
+    category = fields.Integer()
+    title = fields.String(validate=Length(3))
+    description = fields.String(validate=Length(5))
+    position = fields.Integer()
+    locked = fields.Boolean()
+    show_moderators = fields.Boolean()
+    external = fields.String()
+    groups = fields.List(fields.Integer(), validate=Length(min=1))
+
+
 class ForumSchema(ma.Schema):
     id = fields.Integer()
     title = fields.String()
