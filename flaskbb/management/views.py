@@ -784,6 +784,11 @@ class AddForum(MethodView):
         created_forum = self.forum_manager.addForum(request_data)
         return {"id": created_forum.id}, 200
 
+    def patch(self, category_id=None):
+        request_data = request.get_json()
+        updated_forum = self.forum_manager.updateForum(request_data)
+        return {"id": updated_forum.id}, 200
+
 
 class DeleteForum(MethodView):
     decorators = [

@@ -43,4 +43,7 @@ class ForumManager():
 
     def save(self, forum_data, transient=False):
         forum = Forum(**forum_data)
+        if transient:
+            make_transient(forum)
+            make_transient_to_detached(forum)
         return forum.save()
