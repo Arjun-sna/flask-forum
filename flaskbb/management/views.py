@@ -694,17 +694,6 @@ class DeleteGroup(MethodView):
         return redirect(url_for("management.groups"))
 
 
-class Forums(MethodView):
-    decorators = [
-        allows.requires(IsAdmin)
-    ]
-
-    def get(self):
-        categories = Category.query.order_by(Category.position.asc()).all()
-        result = category_schema.jsonify(categories)
-        return result, 200
-
-
 class EditForum(MethodView):
     decorators = [
         allows.requires(
@@ -756,7 +745,7 @@ class EditForum(MethodView):
         )
 
 
-class AddForum(MethodView):
+class Forums(MethodView):
     decorators = [
         allows.requires(IsAdmin)
     ]
@@ -765,16 +754,17 @@ class AddForum(MethodView):
         self.forum_manager = forum_manager
 
     def get(self):
-        categories = self.forum_manager.get_all_forums()
-        return jsonify(categories), 200
+        categories_with_forums = self.forum_manager.get_all_forums()
+        return jsonify(categories_with_forums), 200
 
-    def post(self, category_id=None):
+    def post(self):
         request_data = request.get_json()
         created_forum = self.forum_manager.addForum(request_data)
         return {"id": created_forum.id}, 200
 
-    def patch(self, category_id=None):
+    def patch(self, forum_id=None):
         request_data = request.get_json()
+        request_data['id'] = forum_id
         updated_forum = self.forum_manager.updateForum(request_data)
         return {"id": updated_forum.id}, 200
 
@@ -1307,21 +1297,13 @@ def flaskbb_load_blueprints(app):
     # Forums
     register_view(
         management,
-        routes=['/forums/add', '/forums/<int:category_id>/add'],
-        view_func=AddForum.as_view('add_forum', forum_manager=ForumManager())
+        routes=['/forums', '/forums/<int:forum_id>'],
+        view_func=Forums.as_view('forums', forum_manager=ForumManager())
     )
     register_view(
         management,
         routes=['/forums/<int:forum_id>/delete'],
         view_func=DeleteForum.as_view('delete_forum')
-    )
-    register_view(
-        management,
-        routes=['/forums/<int:forum_id>/edit'],
-        view_func=EditForum.as_view('edit_forum')
-    )
-    register_view(
-        management, routes=['/forums'], view_func=Forums.as_view('forums')
     )
 
     # Groups
