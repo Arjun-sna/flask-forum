@@ -759,13 +759,13 @@ class Forums(MethodView):
 
     def post(self):
         request_data = request.get_json()
-        created_forum = self.forum_manager.addForum(request_data)
+        created_forum = self.forum_manager.add_forum(request_data)
         return {"id": created_forum.id}, 200
 
     def patch(self, forum_id=None):
         request_data = request.get_json()
         request_data['id'] = forum_id
-        updated_forum = self.forum_manager.updateForum(request_data)
+        updated_forum = self.forum_manager.update_forum(request_data)
         return {"id": updated_forum.id}, 200
 
     def delete(self, forum_id=None):

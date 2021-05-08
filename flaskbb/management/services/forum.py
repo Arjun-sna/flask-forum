@@ -32,13 +32,13 @@ class ForumManager():
         categories = Category.query.order_by(Category.position.asc()).all()
         return self.category_schema.dump(categories)
 
-    def addForum(self, forum_data):
+    def add_forum(self, forum_data):
         data = self.forum_input_schema.load(forum_data)
         data['category'] = self.__fetch_category(data['category'])
         data['groups'] = self.__fetch_groups(data['groups'])
         return self.save(data)
 
-    def updateForum(self, forum_data):
+    def update_forum(self, forum_data):
         data = self.forum_update_schema.load(forum_data)
         if 'category' in data:
             data['category'] = self.__fetch_category(data['category'])
