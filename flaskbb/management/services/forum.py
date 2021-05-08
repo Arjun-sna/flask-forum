@@ -1,8 +1,8 @@
 from sqlalchemy.orm.session import make_transient, make_transient_to_detached
 
 from ..schemas import ForumInputSchema, ForumUpdateSchema, CategorySchema
-from ...forum.models import Forum, Category
-from ...user.models import Group
+from ...forum.models import Forum, Category, Topic, Post
+from ...user.models import Group, User
 from ...core.exceptions import ValidationError
 
 
@@ -32,19 +32,29 @@ class ForumManager():
         categories = Category.query.order_by(Category.position.asc()).all()
         return self.category_schema.dump(categories)
 
-    def addForum(self, forum_data):
+    def add_forum(self, forum_data):
         data = self.forum_input_schema.load(forum_data)
         data['category'] = self.__fetch_category(data['category'])
         data['groups'] = self.__fetch_groups(data['groups'])
         return self.save(data)
 
-    def updateForum(self, forum_data):
+    def update_forum(self, forum_data):
         data = self.forum_update_schema.load(forum_data)
         if 'category' in data:
             data['category'] = self.__fetch_category(data['category'])
         if 'groups' in data:
             data['groups'] = self.__fetch_groups(data['groups'])
         return self.save(data, transient=True)
+
+    def delete_forum(self, forum_id):
+        forum = Forum.query.filter_by(id=forum_id).first()
+        if not forum:
+            raise ValidationError('Forum', 'Forum not found')
+
+        involved_users = User.query.filter(
+            Topic.forum_id == forum.id, Post.user_id == User.id).all()
+
+        forum.delete(involved_users)
 
     def save(self, forum_data, transient=False):
         forum = Forum(**forum_data)
