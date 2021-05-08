@@ -41,11 +41,10 @@ from flaskbb.utils.requirements import (CanBanUser, CanEditUser, IsAdmin,
                                         IsAtleastModerator,
                                         IsAtleastSuperModerator)
 from flaskbb.utils.settings import flaskbb_config
-from .schemas import CategorySchema, ForumInputSchema
+from .schemas import CategorySchema
 from .services.forum import ForumManager
 
 category_schema = CategorySchema(many=True)
-forum_input_schema = ForumInputSchema()
 impl = HookimplMarker('flaskbb')
 
 logger = logging.getLogger(__name__)
@@ -783,6 +782,11 @@ class AddForum(MethodView):
         request_data = request.get_json()
         created_forum = self.forum_manager.addForum(request_data)
         return {"id": created_forum.id}, 200
+
+    def patch(self, category_id=None):
+        request_data = request.get_json()
+        updated_forum = self.forum_manager.updateForum(request_data)
+        return {"id": updated_forum.id}, 200
 
 
 class DeleteForum(MethodView):
